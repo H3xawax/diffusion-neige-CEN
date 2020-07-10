@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import progressbar as pb
 
 def Sj1 (Tj,TJ1,Tf, epsi, L, Qj1, C, R):
-
     if Tj <= (Tf-epsi):
         if TJ1 <= (Tf-epsi):
             #print('c\'est bon')
@@ -14,23 +13,6 @@ def Sj1 (Tj,TJ1,Tf, epsi, L, Qj1, C, R):
         if TJ1 >= (Tf+epsi): return 0
         if TJ1 <= (Tf-epsi): return L
         else: return R*(-C*(-epsi+Tj)-Qj1)
-    else:
-        if TJ1 >= (Tf+epsi): return L*(Tj+epsi)/(2*epsi) -L
-        if TJ1 <= (Tf-epsi): return L*(Tj+epsi)/(2*epsi)
-        else : return -R*Qj1
-
-def Sj1_2 (Tj,TJ1,Tf, epsi, L, Qj1, C, R):
-
-    if Tj <= (Tf-epsi):
-        if TJ1 <= (Tf-epsi):
-            #print('c\'est bon')
-            return 0
-        if TJ1 >= (Tf+epsi): return -L
-        else: return R*(-C*(epsi+Tj)+Qj1)
-    if Tj >= (Tf+epsi):
-        if TJ1 >= (Tf+epsi): return 0
-        if TJ1 <= (Tf-epsi): return L
-        else: return R*(-C*(-epsi+Tj)+Qj1)
     else:
         if TJ1 >= (Tf+epsi): return L*(Tj+epsi)/(2*epsi) -L
         if TJ1 <= (Tf-epsi): return L*(Tj+epsi)/(2*epsi)
@@ -48,23 +30,20 @@ def dH(T,epsi, L, Tf):
 
 def conv(Tj1,Tj1k, epsi, L, Tf, C,convergence):
         for i in range (len(Tj1)):
-            #print(Tj1k[i] - Tj1[i])
+            #print('convi: ',i)
+            #print('Tj1kconv',Tj1k[i])
+            #print('Tj1conv',Tj1[i])
             #print('conv :', (H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C)
-            if (abs(H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C) < convergence :
-                return True
+            convmax=0
+            convcandidate=(abs(H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C)
+            if convcandidate>convmax:
+                convmax=convcandidate
+            if (abs(H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C) > convergence :
+                return False
             #else :
               #  print('Non convergence')
-        return False
-
-
-def conv2(Tj1, Tj1k, epsi, L, Tf, C, convergence,i):
-
-    #print('while :', (H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C)
-    if (abs(H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C) < convergence:
-       return True
-        # else :
-        #  print('Non convergence')
-    return False
+           # print(convmax)
+        return True
 
 
 def init(Tj,rho,dx2,C,dt,K,Nx):
@@ -95,7 +74,7 @@ def gaussseidel (Nx,dt,K,dx2,rho,C,epsi,L,Tf,convergence,Tj, Tj1):
         for i in range(1, Nx -1):
             if ((0<dH(Tj1[i],epsi,L,Tf)) and (L> dH(Tj1[i],epsi,L,Tf))):
                 Tj1k[i]=(2*epsi*dH(Tj1[i],epsi,L,Tf))/L -epsi
-                print('if')
+                #print('if')
             else:
                 #print('k:', k)
                 #print('i:',i)
@@ -105,7 +84,7 @@ def gaussseidel (Nx,dt,K,dx2,rho,C,epsi,L,Tf,convergence,Tj, Tj1):
                 Qj1=(Tj[i-1]-2*Tj[i]+Tj[i+1])*(dt*K)/(rho*dx2)
                 #print(Tj[i],Tj[i-1],Tj[i+1])
                 #print((1+lambd/C))
-                #Tj1k[i]= ( Tj[i] + (dt*K)*(Tj1[i-1]+Tj1[i+1])/(C*dx2*rho) + (1/C)*(Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R)))/(1+lambd/C)
+                Tj1k[i]= ( Tj[i] + (dt*K)*(Tj1[i-1]+Tj1[i+1])/(C*dx2*rho) + (1/C)*(Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R)))/(1+lambd/C)
                 #Tjm[i]=Tj1k[i] - Tj1[i]
                 #print(Tj1k[i])
                 #print(Tj1[i])
@@ -113,8 +92,9 @@ def gaussseidel (Nx,dt,K,dx2,rho,C,epsi,L,Tf,convergence,Tj, Tj1):
                 #if (rho*dx2/C)*(Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R))!=0:print((rho*dx2/C)*(Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R)))
                 #print(Tj[i],Tj1[i])
                 #print('apres else Tj1k :', Tj1k)
-                Tj1k[i]=( Tj[i] + (dt*K)/(C*dx2*rho)*(Tj[i-1]+Tj[i+1]) + (1/C)*(dH(Tj[i],epsi,L,Tf)-dH(Tj1[i],epsi,L,Tf))  ) /(1+lambd/C)
+                #Tj1k[i]=( Tj[i] + (dt*K)/(C*dx2*rho)*(Tj[i-1]+Tj[i+1]) + (1/C)*(dH(Tj[i],epsi,L,Tf)-dH(Tj1[i],epsi,L,Tf))  ) /(1+lambd/C)
                         #Tj1k[i]= Tj[i] + (1/C)*(K/(rho*dx2))*(Tj[i-1]-2*Tj[i]+Tj[i+1]) + (1/C)*(dH(Tj[i],epsi,L,Tf)-dH(Tj1[i],epsi,L,Tf))
+
                 #print(dH(Tj[i],epsi,L,Tf)*(rho/dx2))
                 #print('else')
                 #if (conv(Tj1, Tj1k, epsi, L, Tf, C, convergence)):
@@ -128,6 +108,11 @@ def gaussseidel (Nx,dt,K,dx2,rho,C,epsi,L,Tf,convergence,Tj, Tj1):
         k = k + 1
         #print(np.mean(Tjm))
         #print('k:', k)
+        #for i in range (len(Tj1)):
+            # print('boucle: ',i)
+            # print('Tj1k',Tj1k[i])
+            # print('Tj1',Tj1[i])
+            # print('diff :', (H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C)
         if (conv(Tj1,Tj1k, epsi, L, Tf, C,convergence)): break
         #if k>=100:break #pour eviter les non convergence
         Tj1[:]=Tj1k[:]
@@ -146,18 +131,18 @@ Tottime=50000
 dt=1# seconde
 Nt= int(Tottime/dt)#nb de pas de temps
 Totprofond=1
-dx=np.sqrt(dt*K/(C*400)) #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+dx=np.sqrt(dt*K/(C*.43)) #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
 Nx=int(Totprofond/dx)
 dx2=dx*dx
 
 epsi=.1
 Tf=0.
-convergence=.0001
+convergence=.001
 R=1./(1.+2.*C*epsi/L)
 
-bordhaut=20.
-bordbas=20.
-Tini=2.
+bordhaut=2.
+bordbas=0.
+Tini=0
 T=np.ones((Nt,Nx))*Tini
 #T=np.ones((Nt,Nx))*np.linspace(bordhaut-5,bordbas,Nx)
 
