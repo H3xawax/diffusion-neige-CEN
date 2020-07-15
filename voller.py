@@ -9,37 +9,19 @@ def Sj1 (Tj,TJ1,Tf, epsi, L, Qj1, C, R):
         if TJ1 <= (Tf-epsi):
             #print('c\'est bon')
             return 0
-        if TJ1 >= (Tf+epsi): return -L
+        if TJ1 > (Tf+epsi): return -L
         else: return R*(-C*(epsi+Tj)-Qj1)
     if Tj >= (Tf+epsi):
         if TJ1 >= (Tf+epsi): return 0
-        if TJ1 <= (Tf-epsi): return L
+        if TJ1 < (Tf-epsi): return L
         else: return R*(-C*(-epsi+Tj)-Qj1)
     else:
-        if TJ1 >= (Tf+epsi): return L*(Tj+epsi)/(2*epsi) -L
+        if TJ1 > (Tf+epsi): return L*(Tj+epsi)/(2*epsi) -L
         if TJ1 <= (Tf-epsi): return L*(Tj+epsi)/(2*epsi)
         else : return -R*Qj1
-
-def Sj1_2 (Tj,TJ1,Tf, epsi, L, Qj1, C, R):
-
-    if Tj <= (Tf-epsi):
-        if TJ1 <= (Tf-epsi):
-            #print('c\'est bon')
-            return 0
-        if TJ1 >= (Tf+epsi): return -L
-        else: return R*(-C*(epsi+Tj)+Qj1)
-    if Tj >= (Tf+epsi):
-        if TJ1 >= (Tf+epsi): return 0
-        if TJ1 <= (Tf-epsi): return L
-        else: return R*(-C*(-epsi+Tj)+Qj1)
-    else:
-        if TJ1 >= (Tf+epsi): return L*(Tj+epsi)/(2*epsi) -L
-        if TJ1 <= (Tf-epsi): return L*(Tj+epsi)/(2*epsi)
-        else : return -R*Qj1
-
 
 def H(T,epsi, L, Tf,C):
-    if T<(Tf-epsi): return C*T
+    if T<=(Tf-epsi): return C*T
     if T>(Tf+epsi): return C*T+L
     else: return C*T+L*(T+epsi)/(2*epsi)
 
@@ -51,8 +33,8 @@ def dH(T,epsi, L, Tf):
 def conv(Tj1,Tj1k, epsi, L, Tf, C,convergence):
         for i in range (len(Tj1)):
             #print('convi: ',i)
-            #print('Tj1kconv',Tj1k[i])
             #print('Tj1conv',Tj1[i])
+            #print('Tj1kconv', Tj1k[i])
             #print('conv :', (H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C)
             convmax=0
             convcandidate=(abs(H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C)
@@ -92,34 +74,53 @@ def gaussseidel (Nx,dt,K,dx2,rho,C,epsi,L,Tf,convergence,Tj, Tj1):
     #print('avant while Tj1k :', Tj1k)
     while(True):
         for i in range(1, Nx -1):
-            if ((0<dH(Tj1[i],epsi,L,Tf)) and (L> dH(Tj1[i],epsi,L,Tf))):
+
+            #print('if')
+            if (0<dH(Tj1[i],epsi,L,Tf)and dH(Tj1[i],epsi,L,Tf)<L ):
                 Tj1k[i]=(2*epsi*dH(Tj1[i],epsi,L,Tf))/L -epsi
-                #print('if')
+                #print('if:',Tj1[i],':',Tj1k[i])
+
+
+
             else:
+
                 #print('k:', k)
                 #print('i:',i)
-                #print('apres else Tj :', Tj)
-                #print('apres else Tj1 :', Tj1)
-                #print('apres else Tj1k :', Tj1k)
+                #print('avant-Tj :', Tj[i])
+                #print('avant-Tj1 :', Tj1[i])
+                #print('avant-Tj1k :', Tj1k[i])
                 Qj1=(Tj[i-1]-2*Tj[i]+Tj[i+1])*(dt*K)/(rho*dx2)
                 #print(Tj[i],Tj[i-1],Tj[i+1])
                 #print((1+lambd/C))
-                #Tj1k[i]= ( Tj[i] + (dt*K)*(Tj1[i-1]+Tj1[i+1])/(C*dx2*rho) + (1/C)*(Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R)))/(1+lambd/C)
+
+                Tj1k[i]= ( Tj[i] + (dt*K)*(Tj1[i-1]+Tj1[i+1])/(C*dx2*rho) + (1/C)*(Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R)))/(1+lambd/C)
+                #if i==1:
+                    #print('Sj1',Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R))
+                    #print('Tj',Tj[i])
+                    #print('Tj1', Tj1[i])
+                    #print('Tj1k',Tj1k[i])
                 #Tjm[i]=Tj1k[i] - Tj1[i]
-                #print(Tj1k[i])
-                #print(Tj1[i])
+            #print('Tj1k-avant: ',Tj1k[i])
+            #print('Tj1-avant: ',Tj1[i])
                 #print(Tj1k[i] - Tj1[i])
                 #if (rho*dx2/C)*(Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R))!=0:print((rho*dx2/C)*(Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R)))
                 #print(Tj[i],Tj1[i])
                 #print('apres else Tj1k :', Tj1k)
-                Tj1k[i]=( Tj[i] + (dt*K)/(C*dx2*rho)*(Tj[i-1]+Tj[i+1]) + (1/C)*(dH(Tj[i],epsi,L,Tf)-dH(Tj1[i],epsi,L,Tf))) /(1+lambd/C)
+            #Tj1k[i]=( Tj[i] + (dt*K)/(C*dx2*rho)*(Tj[i-1]+Tj[i+1]) + (1/C)*(dH(Tj[i],epsi,L,Tf)-dH(Tj1[i],epsi,L,Tf))) /(1+lambd/C)
                         #Tj1k[i]= Tj[i] + (1/C)*(K/(rho*dx2))*(Tj[i-1]-2*Tj[i]+Tj[i+1]) + (1/C)*(dH(Tj[i],epsi,L,Tf)-dH(Tj1[i],epsi,L,Tf))
+            #print(dH(Tj[i],epsi,L,Tf)*(rho/dx2))
 
-                #print(dH(Tj[i],epsi,L,Tf)*(rho/dx2))
-                #print('else')
-                #if (conv(Tj1, Tj1k, epsi, L, Tf, C, convergence)):
-                 #   break
-                #     return Tj1k, k
+
+                #print('Tj1k-apres: ', Tj1k[i])
+                #print('Tj1-apres: ', Tj1[i])
+            #print('else')
+            #if (conv(Tj1, Tj1k, epsi, L, Tf, C, convergence)):
+            #   break
+            #     return Tj1k, k
+            # if (Sj1(Tj[i],Tj1[i],Tf, epsi, L,Qj1 , C, R)!=0):
+            #     print(Tj1k[i])
+            #     Tj1k[i]=(2*epsi*dH(Tj1[i],epsi,L,Tf))/L -epsi
+            #     print('if:',Tj1[i],':',Tj1k[i])
         #print('fin de boucle Tj : ',Tj)
         #print('fin de boucle Tj1 : ',Tj1)
         #print('fin de boucle Tj1k : ',Tj1k)
@@ -149,36 +150,46 @@ K=2.22
 C=2060
 
 ###############################################
-# Tottime=50000
-# dt=1# seconde
-# Nt= int(Tottime/dt)#nb de pas de temps
-# Totprofond=1
-# dx=np.sqrt(dt*K/(C*.2)) #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
-# Nx=int(Totprofond/dx)
-# dx2=dx*dx
-###################################################
-dx=.05 #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+Tottime=500000
+dt=10000# seconde
+Nt= int(Tottime/dt)#nb de pas de temps
 Totprofond=1
+dx=.01#np.sqrt(dt*K/(C*.43)) #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
 Nx=int(Totprofond/dx)
 dx2=dx*dx
-Tottime=5000
-dt=dx2*C*.12/K
-Nt= int(Tottime/dt)#nb de pas de temps
+print(dt)
+print(dx2)
+print(Nt)
+print(Nx)
+
+
 ###################################################
-epsi=.4
+# dx=.05 #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+# Totprofond=1
+# Nx=int(Totprofond/dx)
+# dx2=dx*dx
+# Tottime=50000
+# dt=dx2*C*.12/K
+# Nt= int(Tottime/dt)#nb de pas de temps
+
+###################################################
+
+epsi=.5
 Tf=.0
 convergence=.001
 R=1./(1.+2.*C*epsi/L)
 lambd = 2*dt*K/(dx2*rho)
-print(dx)
-print((1+lambd/C))
-print(L/(C*(1+lambd/C)))
+#print(dx)
+#print((1+lambd/C))
+#print(L/(C*(1+lambd/C)))
 
+print((L/C)/(2+(2*lambd/C)))
 
-bordhaut=20.
-Tini=-2.
-bordbas=-3.
-
+#####################################
+bordhaut=2.
+Tini=2.
+bordbas=-5.
+#################################
 
 
 T=np.ones((Nt,Nx))*Tini
@@ -204,7 +215,7 @@ plt.ylabel('Profondeur (m)')
 plt.xlabel('Temps (s)')
 extent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
-norm = mcolors.DivergingNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
+norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
 im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='none')
 plt.title('VOLLER CFL: '+str(round((dt*K)/(dx2*C),5))+'Th: '+ str(bordhaut)+ 'Tb: '+str( bordbas)+ 'Ti: '+str(Tini)+'dt: '+str(round(dt,5))+ "dx: "+str(round(dx,5)))
 plt.colorbar()
