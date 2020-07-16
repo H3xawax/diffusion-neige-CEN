@@ -31,25 +31,25 @@ K=2.22
 C=2060
 
 ###################################################
-dx=.05 #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+dx=.025 #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
 Totprofond=1
 Nx=int(Totprofond/dx)
 dx2=dx*dx
 Tottime=50000
-dt=dx2*C*.12/K
+dt=dx2*C*.45/K
 Nt= int(Tottime/dt)#nb de pas de temps
 
 ###################################################
 
-epsi=1
+epsi=.5
 Tf=.0
 convergence=.001
 R=1./(1.+2.*C*epsi/L)
 
 #####################################
 bordhaut=20.
-Tini=-2.
-bordbas=-3.
+Tini=0.
+bordbas=-5.
 #################################
 
 
