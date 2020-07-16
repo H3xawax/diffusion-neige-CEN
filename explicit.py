@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import progressbar as pb
 import matplotlib.colors as mcolors
+import time
+start_time = time.time()
 
 def Hconv(T,epsi, L, Tf,C):
     if T<=(Tf-epsi): return C*T
@@ -48,8 +50,8 @@ R=1./(1.+2.*C*epsi/L)
 
 #####################################
 bordhaut=20.
-Tini=0.
-bordbas=-5.
+Tini=-2.
+bordbas=-20.
 #################################
 
 
@@ -65,8 +67,9 @@ for t in pb.progressbar(range(Nt)):
     for x in range(Nx):
         H[t,x] = Hconv(T[t,x],epsi, L, Tf,C)
 kmax=0
+print()
 print('############### CFL: ',(dt*K)/(dx2*C),"###############")
-print('Résolution')
+print('Résolution de la diffusion en Entalpie')
 
 for t in pb.progressbar(range(1,Nt)):
     #print('######t: ', t)
@@ -76,7 +79,9 @@ print('Transformation de la matrice en Temperature')
 for t in pb.progressbar(range(Nt)):
     for x in range(Nx):
         T[t,x] = Tconv(H[t,x],epsi, L,C)
-print(':', T[Nt-1,:])
+#print(':', T[Nt-1,:])
+
+print("--- %s seconds ---" % (time.time() - start_time))
 
 plt.ylabel('Profondeur (m)')
 plt.xlabel('Temps (s)')

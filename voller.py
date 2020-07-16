@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import progressbar as pb
 import matplotlib.colors as mcolors
-
+import time
+start_time = time.time()
 
 def Sj1 (Tj,TJ1,Tf, epsi, L, Qj1, C, R):
     if Tj <= (Tf-epsi):
@@ -210,6 +211,9 @@ for t in pb.progressbar(range(1,Nt)):
     #if t>=4350:print(T[t,:])
     #junk,T[t,:]=init(T[t-1,:],rho,dx2,C, dt, K, Nx)
 print(':', T[Nt-1,:])
+
+
+print("--- %s seconds ---" % (time.time() - start_time))
 
 plt.ylabel('Profondeur (m)')
 plt.xlabel('Temps (s)')

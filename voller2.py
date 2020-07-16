@@ -2,9 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import progressbar as pb
 import matplotlib.colors as mcolors
-
-
-
+import time
+start_time = time.time()
 
 def alpha (T, Tf, epsi,L):
     if T<Tf-epsi: return 0
@@ -64,8 +63,8 @@ lambd = 2*dt*K/(dx2*rho)
 
 #####################################
 bordhaut=20.
-Tini=0.
-bordbas=-5.
+Tini=-2.
+bordbas=-20.
 #################################
 
 
@@ -80,6 +79,7 @@ for t in pb.progressbar(range(Nt-1)):
     for i in range(1,Nx-1):
         T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
 
+print("--- %s seconds ---" % (time.time() - start_time))
 
 plt.ylabel('Profondeur (m)')
 plt.xlabel('Temps (s)')
@@ -89,5 +89,5 @@ norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer
 im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='none')
 plt.title('/!\VOLLER2 CFL: '+str(round((dt*K)/(dx2*C),5))+'Th: '+ str(bordhaut)+ 'Tb: '+str( bordbas)+ 'Ti: '+str(Tini)+'dt: '+str(round(dt,5))+ "dx: "+str(round(dx,5)))
 plt.colorbar()
-#clb.set_label('Temperature')
+#cax.set_label('Temperature')
 plt.show()
