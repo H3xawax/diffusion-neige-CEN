@@ -20,7 +20,17 @@ def Phi_1 (T, Tf, epsi,L,C):
     if T>Tf+epsi: return C*T+L
     else : return C*T+L*(T+epsi)/(2*epsi)
 
-
+def phase (T, Tf, epsi):
+    Phase=np.empty_like(T,dtype=float)
+    for i in range(np.shape(T)[0]):
+        for j in range(np.shape(T)[1]):
+            if T[i,j]<=(Tf-epsi):
+                Phase[i,j]=0.
+            if T[i,j]>=(Tf+epsi):
+                Phase[i,j]=1.
+            if (T[i,j]<(Tf+epsi) and T[i,j]>(Tf-epsi)):
+                Phase[i,j]=(T[i,j]+Tf+epsi)/(2*epsi)
+    return Phase
  #profondeur y a un pb avec le arrange
 L=333550. #chaleur latente fiusion de la glace
 rho= 917. #masse volumique
@@ -52,7 +62,7 @@ Nt= int(Tottime/dt)#nb de pas de temps
 
 ###################################################
 
-epsi=1
+epsi=.1
 Tf=.0
 lambd = 2*dt*K/(dx2*rho)
 #print(dx)
@@ -81,13 +91,18 @@ for t in pb.progressbar(range(Nt-1)):
 
 print("--- %s seconds ---" % (time.time() - start_time))
 
+Phase=phase(T,Tf,epsi)
+print(np.shape(T))
+print(np.shape(Phase))
+
 plt.ylabel('Profondeur (m)')
 plt.xlabel('Temps (s)')
 extent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
 norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
 im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None')
-plt.title('/!\VOLLER2 CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s")
-plt.colorbar()
-#cax.set_label('Temperature')
+plt.title('/!\VOLLER2 CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Hatching is liquid phase\n Execution time: "+str(round(time.time() - start_time))+"s")
+cb=plt.colorbar()
+cb.ax.set_ylabel('Temperature °C', rotation=270)
+plt.contourf(np.transpose(Phase),1,hatches=['', '//'], alpha=0,aspect='auto',interpolation='None')
 plt.show()

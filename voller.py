@@ -142,7 +142,17 @@ def gaussseidel (Nx,dt,K,dx2,rho,C,epsi,L,Tf,convergence,Tj, Tj1):
 
 
     return Tj1k,k
-
+def phase (T, Tf, epsi):
+    Phase=np.empty_like(T,dtype=float)
+    for i in range(np.shape(T)[0]):
+        for j in range(np.shape(T)[1]):
+            if T[i,j]<=(Tf-epsi):
+                Phase[i,j]=0.
+            if T[i,j]>=(Tf+epsi):
+                Phase[i,j]=1.
+            if (T[i,j]<(Tf+epsi) and T[i,j]>(Tf-epsi)):
+                Phase[i,j]=(T[i,j]+Tf+epsi)/(2*epsi)
+    return Phase
 
  #profondeur y a un pb avec le arrange
 L=333550. #chaleur latente fiusion de la glace
@@ -214,6 +224,7 @@ print(':', T[Nt-1,:])
 
 
 print("--- %s seconds ---" % (time.time() - start_time))
+Phase=phase(T,Tf,epsi)
 
 plt.ylabel('Profondeur (m)')
 plt.xlabel('Temps (s)')
@@ -222,6 +233,7 @@ extent = [dt*0 , Nt,  dx*0, Nx]
 norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
 im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None')
 plt.title('VOLLER CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s")
-plt.colorbar()
-#clb.set_label('Temperature')
+cb=plt.colorbar()
+cb.ax.set_ylabel('Temperature °C', rotation=270)
+plt.contourf(np.transpose(Phase),1,hatches=['', '//'], alpha=0,aspect='auto',interpolation='None',)
 plt.show()
