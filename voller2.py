@@ -104,5 +104,5 @@ im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',inte
 plt.title('/!\VOLLER2 CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Hatching is liquid phase\n Execution time: "+str(round(time.time() - start_time))+"s")
 cb=plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
-plt.contourf(np.transpose(Phase),1,hatches=['', '//'], alpha=0,aspect='auto',interpolation='None')
+plt.contourf(np.transpose(Phase),1,hatches=['', '////'], alpha=0,aspect='auto',interpolation='None')
 plt.show()
