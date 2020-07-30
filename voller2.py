@@ -57,11 +57,15 @@ Totprofond=1
 Nx=int(Totprofond/dx)
 dx2=dx*dx
 Tottime=50000
-dt=dx2*C*45/K
+dt=dx2*C*.45/K
 Nt= int(Tottime/dt)#nb de pas de temps
 
 ###################################################
+##@@@@>
+###############Y A MOYEN IL MANQUE UN RHO DANS LE CFL dx2*C*.45*rho/K
+############http://www-udc.ig.utexas.edu/external/becker/teaching/557/problem_sets/problem_set_fd_implicit.pdf
 
+###################################################
 epsi=.1
 Tf=.0
 lambd = 2*dt*K/(dx2*rho)
@@ -96,15 +100,15 @@ print(np.shape(T))
 print(np.shape(Phase))
 
 plt.ylabel('Profondeur (m)')
-plt.xlabel('Temps (s)')
+plt.xlabel('Pas de temps (s)')
 extent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
 norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
-im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None')
+im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None',extent=extent)
 plt.title('/!\VOLLER2 CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Hatching is liquid phase\n Execution time: "+str(round(time.time() - start_time))+"s")
 cb=plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
-plt.contourf(np.transpose(Phase),5,hatches=[ '','////','////','////','////'], alpha=0,aspect='auto',interpolation='None')
+plt.contourf(np.ma.masked_where(np.transpose(Phase)==0.,np.transpose(Phase)),1,hatches=[ '//','////'], alpha=0,extent=extent,origin='image')
 plt.show()
 plt.imshow(np.transpose(Phase),cmap='Greys',aspect='auto',interpolation='None')
 plt.colorbar()
