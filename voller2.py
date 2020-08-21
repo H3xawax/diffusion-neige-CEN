@@ -81,24 +81,29 @@ Tini=-2.
 bordbas=-20.
 #################################
 
+def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd):
+    T=np.ones((Nt,Nx))*Tini
+    #T=np.ones((Nt,Nx))*np.linspace(bordhaut-5,bordbas,Nx)
 
-T=np.ones((Nt,Nx))*Tini
-#T=np.ones((Nt,Nx))*np.linspace(bordhaut-5,bordbas,Nx)
+    T[:,0]=bordhaut #voir linspace
+    T[:,Nx-1]=bordbas
+    print('############### CFL: ',(dt*K)/(dx2*C),"###############")
 
-T[:,0]=bordhaut #voir linspace
-T[:,Nx-1]=bordbas
-print('############### CFL: ',(dt*K)/(dx2*C),"###############")
-
-for t in pb.progressbar(range(Nt-1)):
-    for i in range(1,Nx-1):
-        T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
-
+    for t in pb.progressbar(range(Nt-1)):
+        for i in range(1,Nx-1):
+            T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
+    return T
+T=voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd)
 print("--- %s seconds ---" % (time.time() - start_time))
 
 Phase=phase(T,Tf,epsi)
 print(np.shape(T))
 print(np.shape(Phase))
-
+# dir = '/Users/angehaddj/Desktop/CD/np.save/'
+# name = 'verite_voller_dx' + str(round(dx, 2)) + '*Nx' + str(round(Nx, 2)) + '*Totx' + str(
+#     round(Tottime, 2)) + '_dt' + str(round(dt, 2)) + '*Nt' + str(round(Nt, 2)) + '*Tott' + str(
+#     round(Tottime, 2)) + '_' + str(bordhaut) + str(Tini) + str(bordbas) + '.np'
+# np.save(dir + name, T)
 plt.ylabel('Profondeur (m)')
 plt.xlabel('Pas de temps (s)')
 extent = [dt*0 , Nt,  dx*0, Nx]

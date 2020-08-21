@@ -53,8 +53,8 @@ Tf=.0
 lambd = 2*dt*K/(dx2*rho)
 #####################################
 bordhaut=20.
-Tini=-2.
-bordbas=20.
+Tini=2.
+bordbas=-2.
 #################################
 convergence=0.0001
 T=np.ones((Nt,Nx))*Tini

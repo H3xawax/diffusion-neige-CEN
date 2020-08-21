@@ -53,17 +53,17 @@ Nt= int(Tottime/dt)#nb de pas de temps
 
 ###################################################
 
-epsi=.1
-Tf=.0
-convergence=.001
-R=1./(1.+2.*C*epsi/L)
+epsi = 1
+Tf = .0
+convergence = .001
+R = 1. / (1. + 2. * C * epsi / L)
 
 #####################################
-bordhaut=20.
+bordhaut=10.
 Tini=-2.
-bordbas=-20.
+bordbas=-10.
 #################################
-
+#pb avec negative temperature
 
 T=np.ones((Nt,Nx))*Tini
 
@@ -87,17 +87,21 @@ b = np.zeros(Nx)
 
 for n in pb.progressbar(range(1,Nt)):
     T[n,:]=np.linalg.solve(Amatrice,T[n-1,:])
-    #T=fonte(T, Tf, n, L, C,epsi,rho)
+    T=fonte(T, Tf, n, L, C,epsi,rho)
 
 print("--- %s seconds ---" % (time.time() - start_time))
-
+dir = '/Users/angehaddj/Desktop/CD/np.save/'
+name = 'crocus_dx' + str(round(dx, 2)) + '*Nx' + str(round(Nx, 2)) + '*Totx' + str(
+     round(Tottime, 2)) + '_dt' + str(round(dt, 2)) + '*Nt' + str(round(Nt, 2)) + '*Tott' + str(
+     round(Tottime, 2)) + '_' + str(bordhaut) + str(Tini) + str(bordbas) + '.np'
+np.save(dir + name, T)
 Phase=phase(T,Tf,epsi)
 plt.ylabel('Profondeur (m)')
 plt.xlabel('Pas de Temps (s)')
 xtent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
 norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
-im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None')
+im=plt.imshow(np.transpose(T),cmap='seismic', norm=norm ,aspect='auto',interpolation='None')
 plt.title('CROCUS CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s")
 cb=plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
