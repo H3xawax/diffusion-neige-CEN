@@ -1,8 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import progressbar as pb
-import matplotlib.colors as mcolors
 import time
+
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import numpy as np
+import progressbar as pb
+
 start_time = time.time()
 
 def phase (T, Tf, epsi):
@@ -62,7 +64,7 @@ Totprofond = 1
 Nx = int(Totprofond / dx)
 dx2 = dx * dx
 Tottime = 25000
-dt = 1
+dt = 100
 Nt = int(Tottime / dt)  # nb de pas de temps
 print(Nt)
 

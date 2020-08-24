@@ -1,9 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt
+import time
+
 # import progressbar as pb
 import matplotlib.colors as mcolors
-import time
-from fonction_comparaison import phase, explicitfunction, voller2function,Crocusfunction
+import matplotlib.pyplot as plt
+import numpy as np
+
+from fonction_comparaison import phase, explicitfunction, voller2function, Crocusfunction
 
 start_time = time.time()
 
@@ -18,7 +20,7 @@ Totprofond = 1
 Nx = int(Totprofond / dx)
 dx2 = dx * dx
 Tottime = 25000
-dt = 1 # multiple 1 2 4 5 8 10 20 25 40 50 100 125 200 250 500 625 1000
+dt = 1# multiple 1 2 4 5 8 10 20 25 40 50 100 125 200 250 500 625 1000
 Nt = int(Tottime / dt)  # nb de pas de temps
 print(Nt)
 
@@ -108,6 +110,8 @@ T = np.kron(T, np.ones((int(np.shape(ref)[0] / np.shape(T)[0]), int(np.shape(ref
 #####################################################################################################
 
 print('traçage du graph')
+norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le
+# 0 au blanc
 titreyang=str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s\n Note: (T-Tref): T>0 <=> T>Tref"
 titre=titreying+titreyang
 plt.imshow(np.transpose (T-ref), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)

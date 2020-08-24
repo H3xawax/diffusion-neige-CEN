@@ -1,8 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import progressbar as pb
-import matplotlib.colors as mcolors
 import time
+
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import numpy as np
+import progressbar as pb
+
 start_time = time.time()
 
 def alpha (T, Tf, epsi,L):
@@ -114,7 +116,7 @@ im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',inte
 plt.title('/!\VOLLER2 CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Hatching is liquid phase\n Execution time: "+str(round(time.time() - start_time))+"s")
 cb=plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
-plt.contourf(np.ma.masked_where(np.transpose(Phase)==0.,np.transpose(Phase)),1,hatches=[ '//','////'], alpha=0,extent=extent,origin='image')
+plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,(np.transpose(Phase))),0,hatches=[ '////'], alpha=0)
 plt.show()
 plt.imshow(np.transpose(Phase),cmap='Greys',aspect='auto',interpolation='None')
 plt.colorbar()
