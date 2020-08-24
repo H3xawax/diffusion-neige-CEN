@@ -52,13 +52,14 @@ C=2060
 
 
 ###################################################
-dx=.025 #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
-Totprofond=1
-Nx=int(Totprofond/dx)
-dx2=dx*dx
-Tottime=50000
-dt=dx2*C*.45/K
-Nt= int(Tottime/dt)#nb de pas de temps
+dx = .01  # metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+Totprofond = 1
+Nx = int(Totprofond / dx)
+dx2 = dx * dx
+Tottime = 25000
+dt = 1
+Nt = int(Tottime / dt)  # nb de pas de temps
+print(Nt)
 
 ###################################################
 ##@@@@>
@@ -66,7 +67,7 @@ Nt= int(Tottime/dt)#nb de pas de temps
 ############http://www-udc.ig.utexas.edu/external/becker/teaching/557/problem_sets/problem_set_fd_implicit.pdf
 
 ###################################################
-epsi=.1
+epsi=1
 Tf=.0
 lambd = 2*dt*K/(dx2*rho)
 #print(dx)

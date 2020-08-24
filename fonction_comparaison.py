@@ -119,10 +119,51 @@ def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd):
 ##############################################
 ###################CROCUS#####################
 ##############################################
-def fonte(T,Tf,n,L,C,epsi,rho):
+
+def fonte(T,Tf,n,L,C,PhaseSL,rho,dx,Nx):
+    T=T+273.15
     Ts=T
-    solid=1-phase (T, Tf, epsi)
-    for i in range(Nx):
-        if T[n,i]>=Tf and T[n-1,i]<Tf:
-            Ts[n,i]=(C*T[n,i]-min(C*rho*(T[n,i]-Tf),solid[n,i]*L))/C
-    return Ts
+    Tf=Tf+273.15
+    for i in range(1,Nx):
+        if T[n,i]>Tf and PhaseSL[i]!=0:
+            #print('Phase',PhaseSL[i])
+            Etot = C * T[n, i] * rho * dx
+            #print('Etot',Etot)
+            Efonte = min((C * (T[n, i] - Tf) * rho *dx),(L * dx * rho* PhaseSL [i]))
+            #print('Efonte',Efonte)
+            #print('soustraciton',Efonte / (rho * dx * C))
+            #print('Ts avant', Ts[n, i])
+            Ts[n, i] = Ts[n, i]-(Efonte / (rho * dx * C))
+            #print('ts apres', Ts[n, i])
+            PhaseSL[i] = PhaseSL[i] - (Efonte / (L * dx * rho))
+            #print('Phase fin',PhaseSL[i])
+            Ts[n,i]=min(Ts[n,i],Tf)
+    return Ts-273.15,PhaseSL
+
+def Crocusfunction(L, rho, K, C, Nx, dx,dx2, dt, Nt, Tf, bordhaut, bordbas, Tini):
+    T=np.ones((Nt,Nx))*Tini
+    PhaseSL=np.ones(Nx) #1=solide 0=liquide
+    PhaseSL[0]=0
+    T[:,0]=bordhaut #voir linspace
+    T[:,Nx-1]=bordbas
+
+    print('############### CFL: ',dt*K/(dx2*rho*C),"###############")
+    print('Résolution en cours')
+
+    A=dt*K/(dx2*rho*C)
+
+    Amatrice=np.zeros((Nx,Nx))
+    Tn_1=np.zeros(Nx)
+
+    for i in range(1,Nx-1):
+        Amatrice[i, i - 1] = -A
+        Amatrice[i, i + 1] = -A
+        Amatrice[i, i] = 1 + 2 * A
+    Amatrice[0, 0] = Amatrice[Nx-1, Nx-1] = 1
+    b = np.zeros(Nx)
+
+    for n in pb.progressbar(range(1,Nt)):
+        T[n,:]=np.linalg.solve(Amatrice,T[n-1,:])
+        T,PhaseSL=fonte(T, Tf, n, L, C,PhaseSL,rho,dx,Nx)
+    #print(PhaseSL)
+    return T

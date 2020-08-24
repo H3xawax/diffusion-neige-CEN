@@ -43,13 +43,15 @@ K=2.22
 C=2060
 
 ###################################################
-dx=.01 #  metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
-Totprofond=1
-Nx=int(Totprofond/dx)
-dx2=dx*dx
-Tottime=25000
-dt=.04
-Nt=int(Tottime/dt) #nb de pas de temps
+dx = .01  # metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+Totprofond = 1
+Nx = int(Totprofond / dx)
+dx2 = dx * dx
+Tottime = 25000
+dt = 1
+Nt = int(Tottime / dt)  # nb de pas de temps
+print(Nt)
+
 
 ###################################################
 
@@ -58,11 +60,11 @@ Tf=.0
 #convergence=.001
 #R=1./(1.+2.*C*epsi/L)
 
-#####################################
+###################################################
 bordhaut=10.
 Tini=-2.
 bordbas=-10.
-#################################
+###################################################
 
 def explicitfunction(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini):
     T=np.ones((Nt,Nx))*Tini

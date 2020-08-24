@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 # import progressbar as pb
 import matplotlib.colors as mcolors
 import time
-from fonction_comparaison import phase, explicitfunction, voller2function
+from fonction_comparaison import phase, explicitfunction, voller2function,Crocusfunction
 
 start_time = time.time()
 
@@ -18,7 +18,7 @@ Totprofond = 1
 Nx = int(Totprofond / dx)
 dx2 = dx * dx
 Tottime = 25000
-dt = 625 # multiple 1 2 4 5 8 10 20 25 40 50 100 125 200 250 500 625 1000
+dt = 1 # multiple 1 2 4 5 8 10 20 25 40 50 100 125 200 250 500 625 1000
 Nt = int(Tottime / dt)  # nb de pas de temps
 print(Nt)
 
@@ -45,35 +45,41 @@ lambd = 2 * dt * K / (dx2 * rho)
 
 
 ######################################
-print('ENTREZ un numero\n 1 explicit\n 2 voller2\n 99 importer un fichier')
+print('ENTREZ un numero\n 1 Explicit\n 2 Voller2\n 3 Crocus\n 99 importer un fichier')
 select = None
+T=None
+titreying=None
 while not select:
     try:
         select = int(input('>'))
     except ValueError:
         print('Invalid Number')
 if select == 1:
+    titreying='Comparaison explicit CFL: '
     T = explicitfunction(L, rho, K, C, Nx, dx2, dt, Nt, epsi, Tf, bordhaut, bordbas, Tini)
 if select == 2:
+    titreying='Comparaison voller CFL: '
     T = voller2function(L, rho, K, C, Nx, dx2, dt, Nt, epsi, Tf, bordhaut, bordbas, Tini, lambd)
+if select == 3:
+    titreying='Comparaison Crocus CFL: '
+    T = Crocusfunction(L, rho, K, C, Nx,dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini)
 if select == 99:
+    titreying="Voir le fichier loadé"
     T = np.load(
-        '/Users/angehaddj/Desktop/CD/np.save/verite_voller_dx0.01*Nx100*Totx25000_dt1000*Nt25*Tott25000_10.0-2.0-10.0.np.npy')
+        '/Users/angehaddj/Desktop/CD/np.save/verite_dx0.05*Nx20*Totx25000_dt1*Nt25000*Tott25000_10.0-2.0-10.0.np.npy')
+        #'/Users/angehaddj/Desktop/CD/np.save/verite_dx0.05*Nx20*Totx25000_dt1*Nt25000*Tott25000_10.0-2.0-10.0.np.npy')
 print("--- %s seconds ---" % (time.time() - start_time))
 
 Phase = phase(T, Tf, epsi)
-if select == 1:
-    titre = 'EXPLICIT CFL: '
-if select == 2:
-    titre = 'VOLLER2 CFL: '
+
 #
 plt.ylabel('Profondeur (nb de pas)')
 plt.xlabel('Temps (nb de pas)')
-# xtent = [dt*0 , Nt,  dx*0, Nx]
-# #print(extent)
+# extent = [dt*0 , Nt,  dx*0, Nx]
+#print(extent)
 norm = mcolors.TwoSlopeNorm(vcenter=0)  # pour fixer le 0 au blanc
 # im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None')
-# plt.title(titre+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s")
+# plt.title(titreying+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s")
 # cb=plt.colorbar()
 # cb.ax.set_ylabel('Temperature °C', rotation=270)
 # plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,np.transpose(Phase)),0,hatches=[ '////'], alpha=0)
@@ -90,18 +96,23 @@ norm = mcolors.TwoSlopeNorm(vcenter=0)  # pour fixer le 0 au blanc
 #     round(Tottime, 2)) + '_dt' + str(round(dt, 2)) + '*Nt' + str(round(Nt, 2)) + '*Tott' + str(
 #     round(Tottime, 2)) + '_' + str(bordhaut) + str(Tini) + str(bordbas) + '.np'
 # np.save(dir + name, T)
-
-save = np.load('/Users/angehaddj/Desktop/CD/np.save/verite_dx0.01*Nx100*Totx25000_dt0.04*Nt625000*Tott25000_10.0-2.0-10.0.np.npy')
+print("load fichier")
+ref = np.load('/Users/angehaddj/Desktop/CD/np.save/verite_dx0.01*Nx100*Totx25000_dt0.04*Nt625000*Tott25000_10.0-2.0-10.0.np.npy')
 print(np.shape(T)[0])
+
+print("reformat")
 #####################################################################################################
 #          reformat pour la soustraction comparaison
-print(((np.shape(save)[0] / np.shape(T)[0]), (np.shape(save)[1] / np.shape(T)[1])))
-T = np.kron(T, np.ones((int(np.shape(save)[0] / np.shape(T)[0]), int(np.shape(save)[1] / np.shape(T)[1]))))
+print(((np.shape(ref)[0] / np.shape(T)[0]), (np.shape(ref)[1] / np.shape(T)[1])))
+T = np.kron(T, np.ones((int(np.shape(ref)[0] / np.shape(T)[0]), int(np.shape(ref)[1] / np.shape(T)[1]))))
 #####################################################################################################
 
-
-plt.imshow(np.transpose(save - T), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
-plt.title('save-calcul')
+print('traçage du graph')
+titreyang=str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s\n Note: (T-Tref): T>0 <=> T>Tref"
+titre=titreying+titreyang
+plt.imshow(np.transpose (T-ref), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
+plt.title(titre)
 cb = plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
+plt.savefig('/Users/angehaddj/Desktop/temp/'+titreying+'dt'+str(round(dt,5))+'dx'+str(round(dx,5))+'.png', format='png',dpi=1200)
 plt.show()
