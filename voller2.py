@@ -54,7 +54,7 @@ C=2060
 
 
 ###################################################
-dx = .01  # metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+dx = .05  # metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
 Totprofond = 1
 Nx = int(Totprofond / dx)
 dx2 = dx * dx
@@ -69,7 +69,7 @@ print(Nt)
 ############http://www-udc.ig.utexas.edu/external/becker/teaching/557/problem_sets/problem_set_fd_implicit.pdf
 
 ###################################################
-epsi=1
+epsi=.1
 Tf=.0
 lambd = 2*dt*K/(dx2*rho)
 #print(dx)
@@ -79,8 +79,8 @@ lambd = 2*dt*K/(dx2*rho)
 #print((L/C)/(2+(2*lambd/C)))
 
 #####################################
-bordhaut=20.
-Tini=-2.
+bordhaut=-20.
+Tini=-10.
 bordbas=-20.
 #################################
 
@@ -95,6 +95,21 @@ def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd):
     for t in pb.progressbar(range(Nt-1)):
         for i in range(1,Nx-1):
             T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
+            k=0
+            T1=T[t+1,i]
+            T2=1000000000000.#pour enbrayer sur le while a chaque fois
+            while(True):
+                T2 = (Phi_1(T1, Tf, epsi, L, C) + (dt * K) * (T[t, i - 1] + T[t, i + 1]) / (
+                            dx2 * rho) + alpha(T1, Tf, epsi, L)) / beta(T1, Tf, epsi, L, C, lambd)
+                if(abs(T1-T2)<.001):
+                    T[t+1,i]=T2
+                    break
+                else:
+                    T1=T2
+                    k=k+1
+                    print(k)
+
+            #print(k + 1)
     return T
 T=voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd)
 print("--- %s seconds ---" % (time.time() - start_time))
@@ -111,14 +126,14 @@ plt.ylabel('Profondeur (m)')
 plt.xlabel('Pas de temps (s)')
 extent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
-norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
+norm = mcolors.TwoSlopeNorm(vmin=-20, vmax = 20, vcenter=0) #pour fixer le 0 au blanc
 im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None',extent=extent)
 plt.title('/!\VOLLER2 CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Hatching is liquid phase\n Execution time: "+str(round(time.time() - start_time))+"s")
 cb=plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
-plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,(np.transpose(Phase))),0,hatches=[ '////'], alpha=0)
+#plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,(np.transpose(Phase))),0,hatches=[ '////'], alpha=0)
 plt.show()
-plt.imshow(np.transpose(Phase),cmap='Greys',aspect='auto',interpolation='None')
-plt.colorbar()
-plt.title('/!\VOLLER2 CFL Phase')
-plt.show()
+# plt.imshow(np.transpose(Phase),cmap='Greys',aspect='auto',interpolation='None')
+# plt.colorbar()
+# plt.title('/!\VOLLER2 CFL Phase')
+# plt.show()

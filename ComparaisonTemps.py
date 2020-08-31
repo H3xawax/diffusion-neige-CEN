@@ -82,9 +82,7 @@ def compa(L, rho, K, C, Nx, dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini,ref):
     return T-ref
 
 # T=np.empty((3,625000))
-dt=np.array([100,500,1000])
-# plt.axvline(x=0.,color='k',ls=':')
-#plt.gca().invert_yaxis()
+dt=np.array([1,10,100,500,1000])
 for i in range(len(dt)):
     #print('ok')
     #print(dt[i])
@@ -94,12 +92,14 @@ for i in range(len(dt)):
     #print(np.shape(T))
     print("Plot")
     plt.plot(T,np.arange(100),label=str(dt[i])+'s ')
-    plt.gca().invert_yaxis()
+    #plt.gca().invert_yaxis()
 
-# plt.ylabel('Profondeur (nb de pas)')
-# plt.xlabel('Temps (nb de pas)')
+plt.ylabel('Profondeur (nb de pas)')
+plt.xlabel('Erreur par / ref  (°C)')
+plt.title("Erreur du gradient de temperature\ndans la profondeur a la fin de simulation (25000s)\nen fonction des pas de temps de simulation")
+# plt.axvline(x=0.,color='k',ls=':')
 plt.legend()
-plt.gca().invert_yaxis()
+#plt.gca().invert_yaxis()
 plt.grid(alpha=.3)
 plt.gca().invert_yaxis()
 plt.show()

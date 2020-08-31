@@ -61,7 +61,7 @@ if select == 1:
     T = explicitfunction(L, rho, K, C, Nx, dx2, dt, Nt, epsi, Tf, bordhaut, bordbas, Tini)
 if select == 2:
     titreying='Comparaison voller CFL: '
-    T = voller2function(L, rho, K, C, Nx, dx2, dt, Nt, epsi, Tf, bordhaut, bordbas, Tini, lambd)
+    T = voller2function(L, rho, K, C, Nx, dx2, dt, Nt, epsi, Tf, bordhaut, bordbas, Tini, lambd,convergence)
 if select == 3:
     titreying='Comparaison Crocus CFL: '
     T = Crocusfunction(L, rho, K, C, Nx,dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini)
@@ -108,15 +108,20 @@ print("reformat")
 print(((np.shape(ref)[0] / np.shape(T)[0]), (np.shape(ref)[1] / np.shape(T)[1])))
 T = np.kron(T, np.ones((int(np.shape(ref)[0] / np.shape(T)[0]), int(np.shape(ref)[1] / np.shape(T)[1]))))
 #####################################################################################################
+print(np.std(abs(T-ref)))
 
 print('traçage du graph')
 norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le
 # 0 au blanc
-titreyang=str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s\n Note: (T-Tref): T>0 <=> T>Tref"
+titreyang=str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s\n Note: (T-Tref)>0 <=> T>Tref"
 titre=titreying+titreyang
 plt.imshow(np.transpose (T-ref), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
 plt.title(titre)
 cb = plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
 plt.savefig('/Users/angehaddj/Desktop/temp/'+titreying+'dt'+str(round(dt,5))+'dx'+str(round(dx,5))+'.png', format='png',dpi=1200)
+plt.show()
+plt.imshow(np.transpose (ref), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
+plt.show()
+plt.imshow(np.transpose (T), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
 plt.show()

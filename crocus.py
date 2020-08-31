@@ -59,7 +59,7 @@ C=2060.
 ###################################################
 
 ###################################################
-dx = .01  # metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+dx = .05  # metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
 Totprofond = 1
 Nx = int(Totprofond / dx)
 dx2 = dx * dx
@@ -75,9 +75,9 @@ Tf = .0
 R = 1. / (1. + 2. * C * epsi / L)
 
 #####################################
-bordhaut=10.
-Tini=-2.
-bordbas=-10.
+bordhaut=-20.
+Tini=-10.
+bordbas=-20.
 #################################
 #pb avec negative temperature
 def Crocusfunction(L, rho, K, C, Nx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini):
@@ -109,26 +109,39 @@ def Crocusfunction(L, rho, K, C, Nx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini):
     return T
 T=Crocusfunction(L, rho, K, C, Nx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini)
 
-print("--- %s seconds ---" % (time.time() - start_time))
-dir = '/Users/angehaddj/Desktop/CD/np.save/'
-name = 'crocus_dx' + str(round(dx, 2)) + '*Nx' + str(round(Nx, 2)) + '*Totx' + str(
-     round(Tottime, 2)) + '_dt' + str(round(dt, 2)) + '*Nt' + str(round(Nt, 2)) + '*Tott' + str(
-     round(Tottime, 2)) + '_' + str(bordhaut) + str(Tini) + str(bordbas) + '.np'
-np.save(dir + name, T)
-Phase=phase(T,Tf,epsi)
+# print("--- %s seconds ---" % (time.time() - start_time))
+# dir = '/Users/angehaddj/Desktop/CD/np.save/'
+# name = 'crocus_dx' + str(round(dx, 2)) + '*Nx' + str(round(Nx, 2)) + '*Totx' + str(
+#      round(Tottime, 2)) + '_dt' + str(round(dt, 2)) + '*Nt' + str(round(Nt, 2)) + '*Tott' + str(
+#      round(Tottime, 2)) + '_' + str(bordhaut) + str(Tini) + str(bordbas) + '.np'
+# np.save(dir + name, T)
+# Phase=phase(T,Tf,epsi)
+# plt.ylabel('Profondeur (m)')
+# plt.xlabel('Pas de Temps (s)')
+# xtent = [dt*0 , Nt,  dx*0, Nx]
+# #print(extent)
+# norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
+# im=plt.imshow(np.transpose(T),cmap='seismic' , norm=norm,aspect='auto',interpolation='None')
+# plt.title('CROCUS CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s")
+# cb=plt.colorbar()
+# cb.ax.set_ylabel('Temperature °C', rotation=270)
+# plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,(np.transpose(Phase))),0,hatches=[ '////'], alpha=0)
+# plt.show()
+# # plt.imshow(np.transpose(Phase),cmap='viridis',aspect='auto',interpolation='None')
+# # plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,np.transpose(Phase)),0,hatches=[ '////'], alpha=0)
+# # plt.colorbar()
+# # plt.title('/!\CROCUS CFL Phase')
+# # plt.show()
+
+
 plt.ylabel('Profondeur (m)')
-plt.xlabel('Pas de Temps (s)')
-xtent = [dt*0 , Nt,  dx*0, Nx]
+plt.xlabel('Pas de temps (s)')
+extent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
-norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le 0 au blanc
-im=plt.imshow(np.transpose(T),cmap='seismic' , norm=norm,aspect='auto',interpolation='None')
-plt.title('CROCUS CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s")
+norm = mcolors.TwoSlopeNorm(vmin=-20, vmax = 20, vcenter=0) #pour fixer le 0 au blanc
+im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None',extent=extent)
+plt.title('/!\crocus CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Hatching is liquid phase\n Execution time: "+str(round(time.time() - start_time))+"s")
 cb=plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
-plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,(np.transpose(Phase))),0,hatches=[ '////'], alpha=0)
+#plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,(np.transpose(Phase))),0,hatches=[ '////'], alpha=0)
 plt.show()
-# plt.imshow(np.transpose(Phase),cmap='viridis',aspect='auto',interpolation='None')
-# plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,np.transpose(Phase)),0,hatches=[ '////'], alpha=0)
-# plt.colorbar()
-# plt.title('/!\CROCUS CFL Phase')
-# plt.show()

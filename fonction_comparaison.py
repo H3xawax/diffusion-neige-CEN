@@ -1,8 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import progressbar as pb
-import matplotlib.colors as mcolors
-import time
+
 
 def phase (T, Tf, epsi):
     Phase=np.empty_like(T,dtype=float)
@@ -102,7 +100,7 @@ def Phi_1 (T, Tf, epsi,L,C):
     if T>Tf+epsi: return C*T+L
     else : return C*T+L*(T+epsi)/(2*epsi)
 
-def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd):
+def voller2functionasbeen(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd):
     T=np.ones((Nt,Nx))*Tini
     #T=np.ones((Nt,Nx))*np.linspace(bordhaut-5,bordbas,Nx)
 
@@ -114,7 +112,32 @@ def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd):
         for i in range(1,Nx-1):
             T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
     return T
+def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd,convergence):
+    T=np.ones((Nt,Nx))*Tini
+    #T=np.ones((Nt,Nx))*np.linspace(bordhaut-5,bordbas,Nx)
 
+    T[:,0]=bordhaut #voir linspace
+    T[:,Nx-1]=bordbas
+    print('############### CFL: ',(dt*K)/(dx2*C),"###############")
+
+    for t in pb.progressbar(range(Nt-1)):
+        for i in range(1,Nx-1):
+            T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
+            k=0
+            T1=T[t+1,i]
+            while(True):
+                T2 = (Phi_1(T1, Tf, epsi, L, C) + (dt * K) * (T[t, i - 1] + T[t, i + 1]) / (
+                            dx2 * rho) + alpha(T1, Tf, epsi, L)) / beta(T1, Tf, epsi, L, C, lambd)
+                if(abs(T1-T2)<convergence):
+                    T[t+1,i]=T2
+                    break
+                else:
+                    T1=T2
+                    k=k+1
+                    #print(k)
+
+            #print(k + 1)
+    return T
 
 ##############################################
 ###################CROCUS#####################
