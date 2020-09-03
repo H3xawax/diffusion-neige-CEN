@@ -7,6 +7,24 @@ import progressbar as pb
 
 start_time = time.time()
 
+
+def conv(Tj1, Tj1k, epsi, L, Tf, C, convergence):
+    for i in range(len(Tj1)):
+        # print('convi: ',i)
+        # print('Tj1conv',Tj1[i])
+        # print('Tj1kconv', Tj1k[i])
+        # print('conv :', (H(Tj1[i], epsi, L, Tf, C) - H(Tj1k[i], epsi, L, Tf, C)) / C)
+        convmax = 0
+        convcandidate = (abs(Phi_1(Tj1[i], epsi, L, Tf, C) - Phi_1(Tj1k[i], epsi, L, Tf, C)) / C)
+        if (convcandidate > convmax):
+            convmax = convcandidate
+        if abs(Phi_1(Tj1[i], epsi, L, Tf, C) - Phi_1(Tj1k[i], epsi, L, Tf, C)) / C > convergence:
+            return False
+        # else :
+        #  print('Non convergence')
+    # print(convmax)
+    return True
+
 def alpha (T, Tf, epsi,L):
     if T<Tf-epsi: return 0
     if T>Tf+epsi: return -L
@@ -79,9 +97,9 @@ lambd = 2*dt*K/(dx2*rho)
 #print((L/C)/(2+(2*lambd/C)))
 
 #####################################
-bordhaut=-20.
-Tini=-10.
-bordbas=-20.
+bordhaut=10.
+Tini=-2.
+bordbas=-10.
 #################################
 
 def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd):
@@ -93,24 +111,24 @@ def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd):
     print('############### CFL: ',(dt*K)/(dx2*C),"###############")
 
     for t in pb.progressbar(range(Nt-1)):
-        for i in range(1,Nx-1):
-            T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
-            k=0
-            T1=T[t+1,i]
-            T2=1000000000000.#pour enbrayer sur le while a chaque fois
-            while(True):
-                T2 = (Phi_1(T1, Tf, epsi, L, C) + (dt * K) * (T[t, i - 1] + T[t, i + 1]) / (
-                            dx2 * rho) + alpha(T1, Tf, epsi, L)) / beta(T1, Tf, epsi, L, C, lambd)
-                if(abs(T1-T2)<.001):
-                    T[t+1,i]=T2
-                    break
-                else:
-                    T1=T2
-                    k=k+1
-                    print(k)
-
-            #print(k + 1)
+        while (True):
+            T1=T
+            k = 0
+            for i in range(1,Nx-1):
+                T1[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
+                k = k + 1
+                print(k)
+            if conv(T, T1, t, .01, Nx): break
+            T = T1
     return T
+
+def conv (T,T1,t,convergence,Nx):
+    for i in range(1,Nx-1) :
+        if abs(Phi_1(T[t,i], Tf, epsi,L,C)- Phi_1(T1[t,i], Tf, epsi,L,C))/C > convergence:
+            return False
+    return True
+
+
 T=voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd)
 print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -126,7 +144,7 @@ plt.ylabel('Profondeur (m)')
 plt.xlabel('Pas de temps (s)')
 extent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
-norm = mcolors.TwoSlopeNorm(vmin=-20, vmax = 20, vcenter=0) #pour fixer le 0 au blanc
+norm = mcolors.TwoSlopeNorm(vmin=-10, vmax = 10, vcenter=0) #pour fixer le 0 au blanc
 im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None',extent=extent)
 plt.title('/!\VOLLER2 CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Hatching is liquid phase\n Execution time: "+str(round(time.time() - start_time))+"s")
 cb=plt.colorbar()

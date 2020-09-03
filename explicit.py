@@ -44,12 +44,12 @@ K=2.22#conductivité
 C=2060
 
 ###################################################
-dx = .05  # metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
+dx = .1  # metre   /!\ ca ne marche pas avec tous les dx si trop grand on devient absurde
 Totprofond = 1
 Nx = int(Totprofond / dx)
 dx2 = dx * dx
 Tottime = 25000
-dt = 1
+dt = 2
 Nt = int(Tottime / dt)  # nb de pas de temps
 print(Nt)
 
@@ -62,9 +62,9 @@ Tf=.0
 #R=1./(1.+2.*C*epsi/L)
 
 ###################################################
-bordhaut=-20.
-Tini=-10.
-bordbas=-20.
+bordhaut=10.
+Tini=-2.
+bordbas=-10.
 ###################################################
 
 def explicitfunction(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini):
@@ -74,7 +74,7 @@ def explicitfunction(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini):
 
     T[:,0]=bordhaut #voir linspace
     T[:,Nx-1]=bordbas
-
+    print('############### CFL: ',(dt*K)/(dx2*rho),"###############")
     print('Transformation de la matrice en Entalpie')
     for t in pb.progressbar(range(Nt)):
         for x in range(Nx):
@@ -98,9 +98,10 @@ T=explicitfunction(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini)
 print("--- %s seconds ---" % (time.time() - start_time))
 Phase=phase(T,Tf,epsi)
 
-# dir='/Users/angehaddj/Desktop/CD/np.save/'
-# name='verite_dx'+str(round(dx,2))+'*Nx'+str(round(Nx,2))+'*Totx'+str(round(Tottime,2))+'_dt'+str(round(dt,2))+'*Nt'+str(round(Nt,2))+'*Tott'+str(round(Tottime,2))+'_'+str(bordhaut)+str(Tini)+str(bordbas)+'.np'
-# np.save(dir+name,T)
+dir='/Users/angehaddj/Desktop/CD/np.save/'
+name='verite_dx'+str(round(dx,2))+'*Nx'+str(round(Nx,2))+'*Totx'+str(round(Tottime,2))+'_dt'+str(round(dt,2))+'*Nt'+str(round(Nt,2))+'*Tott'+str(round(Tottime,2))+'_'+str(bordhaut)+str(Tini)+str(bordbas)+'.np'
+np.save(dir+name,T)
+print(dir+name)
 #
 # plt.ylabel('Nb de pas de profondeur')
 # plt.xlabel('Nb de pas de temps')
@@ -118,16 +119,16 @@ Phase=phase(T,Tf,epsi)
 # # plt.colorbar()
 # # plt.title('/!\explicit CFL Phase')
 # # plt.show()
-plt.ylabel('Profondeur (m)')
-plt.xlabel('Pas de temps (s)')
+plt.ylabel('Profondeur (Nb de pas)')
+plt.xlabel('Pas de temps (nb de pas)')
 extent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
-norm = mcolors.TwoSlopeNorm(vmin=-20, vmax = 20, vcenter=0) #pour fixer le 0 au blanc
+norm = mcolors.TwoSlopeNorm(vmin=-10, vmax = 10, vcenter=0) #pour fixer le 0 au blanc
 im=plt.imshow(np.transpose(T),cmap=plt.cm.seismic, norm=norm ,aspect='auto',interpolation='None',extent=extent)
-plt.title('/!\explicit CFL: '+str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Hatching is liquid phase\n Execution time: "+str(round(time.time() - start_time))+"s")
+plt.title('/!\explicit CFL: '+str(round((dt*K)/(dx2*rho),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s")
 cb=plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
-#plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,(np.transpose(Phase))),0,hatches=[ '////'], alpha=0)
+#plt.contourf(np.ma.masked_where(np.transpose(Phase)==0,np.transpose(Phase)),0,hatches=[ '////'], alpha=0)
 plt.show()
 # plt.imshow(np.transpose(Phase),cmap='Greys',aspect='auto',interpolation='None')
 # plt.colorbar()

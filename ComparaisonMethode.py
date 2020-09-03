@@ -20,7 +20,7 @@ Totprofond = 1
 Nx = int(Totprofond / dx)
 dx2 = dx * dx
 Tottime = 25000
-dt = 1# multiple 1 2 4 5 8 10 20 25 40 50 100 125 200 250 500 625 1000
+dt = 1000# multiple 1 2 4 5 8 10 20 25 40 50 100 125 200 250 500 625 1000
 Nt = int(Tottime / dt)  # nb de pas de temps
 print(Nt)
 
@@ -33,7 +33,7 @@ print(Nt)
 
 epsi = 1
 Tf = .0
-convergence = .001
+convergence = .0001
 R = 1. / (1. + 2. * C * epsi / L)
 
 #####################################
@@ -57,13 +57,13 @@ while not select:
     except ValueError:
         print('Invalid Number')
 if select == 1:
-    titreying='Comparaison explicit CFL: '
+    titreying=('Comparaison explicit CFL: '+str(round((dt*K)/(dx2*rho),5)))
     T = explicitfunction(L, rho, K, C, Nx, dx2, dt, Nt, epsi, Tf, bordhaut, bordbas, Tini)
 if select == 2:
-    titreying='Comparaison voller CFL: '
+    titreying='Comparaison voller '
     T = voller2function(L, rho, K, C, Nx, dx2, dt, Nt, epsi, Tf, bordhaut, bordbas, Tini, lambd,convergence)
 if select == 3:
-    titreying='Comparaison Crocus CFL: '
+    titreying='Comparaison Crocus '
     T = Crocusfunction(L, rho, K, C, Nx,dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini)
 if select == 99:
     titreying="Voir le fichier loadé"
@@ -75,8 +75,8 @@ print("--- %s seconds ---" % (time.time() - start_time))
 Phase = phase(T, Tf, epsi)
 
 #
-plt.ylabel('Profondeur (nb de pas)')
-plt.xlabel('Temps (nb de pas)')
+plt.ylabel('Profondeur (nb de pas dx)')
+plt.xlabel('Temps (nb de pas dt)')
 # extent = [dt*0 , Nt,  dx*0, Nx]
 #print(extent)
 norm = mcolors.TwoSlopeNorm(vcenter=0)  # pour fixer le 0 au blanc
@@ -99,13 +99,18 @@ norm = mcolors.TwoSlopeNorm(vcenter=0)  # pour fixer le 0 au blanc
 #     round(Tottime, 2)) + '_' + str(bordhaut) + str(Tini) + str(bordbas) + '.np'
 # np.save(dir + name, T)
 print("load fichier")
-ref = np.load('/Users/angehaddj/Desktop/CD/np.save/verite_dx0.01*Nx100*Totx25000_dt0.04*Nt625000*Tott25000_10.0-2.0-10.0.np.npy')
+#ref=np.load('/Users/angehaddj/Desktop/bined3.np.npy')
+#ref = np.load('/Users/angehaddj/Desktop/CD/np.save/verite_dx0.01*Nx200*Totx25000_dt0.01*Nt5000000*Tott25000_10.0-2.0-10.0.np.npy')
+ref = np.load('/Users/angehaddj/Desktop/CD/np.save/verite_dx0.01*Nx100*Totx25000_dt0.02*Nt1250000*Tott25000_10.0-2.0-10.0.np.npy')
+print("____",ref.shape)
 print(np.shape(T)[0])
+#y a un arrondi donc c'est pas vraiment 0.01 mais 0,005
 
 print("reformat")
 #####################################################################################################
 #          reformat pour la soustraction comparaison
 print(((np.shape(ref)[0] / np.shape(T)[0]), (np.shape(ref)[1] / np.shape(T)[1])))
+print('debut kron')
 T = np.kron(T, np.ones((int(np.shape(ref)[0] / np.shape(T)[0]), int(np.shape(ref)[1] / np.shape(T)[1]))))
 #####################################################################################################
 print(np.std(abs(T-ref)))
@@ -113,15 +118,15 @@ print(np.std(abs(T-ref)))
 print('traçage du graph')
 norm = mcolors.TwoSlopeNorm(vmin=T.min(), vmax = T.max(), vcenter=0) #pour fixer le
 # 0 au blanc
-titreyang=str(round((dt*K)/(dx2*C),5))+'\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s\n Note: (T-Tref)>0 <=> T>Tref"
+titreyang=('\n Th: '+ str(bordhaut)+ ' Tb: '+str( bordbas)+ ' Ti: '+str(Tini)+' dt: '+str(round(dt,5))+ " dx: "+str(round(dx,5))+"\n Execution time: "+str(round(time.time() - start_time))+"s\n Note: (T-Tref)>0 <=> T>Tref")
 titre=titreying+titreyang
 plt.imshow(np.transpose (T-ref), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
 plt.title(titre)
 cb = plt.colorbar()
 cb.ax.set_ylabel('Temperature °C', rotation=270)
-plt.savefig('/Users/angehaddj/Desktop/temp/'+titreying+'dt'+str(round(dt,5))+'dx'+str(round(dx,5))+'.png', format='png',dpi=1200)
+plt.savefig('/Users/angehaddj/Desktop/temp/'+titreying+'dt'+str(round(dt,5))+'dx'+str(round(dx,5))+'.png', format='png',dpi=400)
 plt.show()
-plt.imshow(np.transpose (ref), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
-plt.show()
-plt.imshow(np.transpose (T), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
-plt.show()
+# plt.imshow(np.transpose (ref), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
+# plt.show()
+# plt.imshow(np.transpose (T), cmap=plt.cm.seismic, aspect='auto', interpolation='None',norm=norm)
+# plt.show()

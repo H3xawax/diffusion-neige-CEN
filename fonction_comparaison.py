@@ -112,6 +112,7 @@ def voller2functionasbeen(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,l
         for i in range(1,Nx-1):
             T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
     return T
+
 def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd,convergence):
     T=np.ones((Nt,Nx))*Tini
     #T=np.ones((Nt,Nx))*np.linspace(bordhaut-5,bordbas,Nx)
@@ -121,23 +122,22 @@ def voller2function(L,rho,K,C,Nx,dx2,dt,Nt,epsi,Tf,bordhaut,bordbas,Tini,lambd,c
     print('############### CFL: ',(dt*K)/(dx2*C),"###############")
 
     for t in pb.progressbar(range(Nt-1)):
-        for i in range(1,Nx-1):
-            T[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
-            k=0
-            T1=T[t+1,i]
-            while(True):
-                T2 = (Phi_1(T1, Tf, epsi, L, C) + (dt * K) * (T[t, i - 1] + T[t, i + 1]) / (
-                            dx2 * rho) + alpha(T1, Tf, epsi, L)) / beta(T1, Tf, epsi, L, C, lambd)
-                if(abs(T1-T2)<convergence):
-                    T[t+1,i]=T2
-                    break
-                else:
-                    T1=T2
-                    k=k+1
-                    #print(k)
-
-            #print(k + 1)
+        while (True):
+            T1=T
+            #k = 0
+            for i in range(1,Nx-1):
+                T1[t+1,i]=( Phi_1(T[t,i],Tf, epsi,L,C) + (dt*K)*(T[t,i-1]+T[t,i+1])/(dx2*rho) + alpha(T[t,i], Tf, epsi,L))/beta(T[t,i],Tf, epsi,L,C,lambd)
+                #k = k + 1
+                #print(k)
+            if conv(T, T1, t, convergence, Nx,Tf, epsi,L,C): break
+            T = T1
     return T
+
+def conv (T,T1,t,convergence,Nx,Tf, epsi,L,C):
+    for i in range(1,Nx-1) :
+        if abs(Phi_1(T[t,i], Tf, epsi,L,C)- Phi_1(T1[t,i], Tf, epsi,L,C))/C > convergence:
+            return False
+    return True
 
 ##############################################
 ###################CROCUS#####################

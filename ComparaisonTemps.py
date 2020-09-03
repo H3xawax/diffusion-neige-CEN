@@ -4,7 +4,7 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
-from fonction_comparaison import Crocusfunction
+from fonction_comparaison import explicitfunction
 
 start_time = time.time()
 
@@ -41,8 +41,10 @@ bordbas = -10.
 print("load fichier")
 ref = np.load('/Users/angehaddj/Desktop/CD/np.save/verite_dx0.01*Nx100*Totx25000_dt0.04*Nt625000*Tott25000_10.0-2.0-10.0.np.npy')
 def compa(L, rho, K, C, Nx, dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini,ref):
-
-    T=Crocusfunction(L, rho, K, C, Nx, dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini)
+    lambd = 2 * dt * K / (dx2 * rho)
+    #T=Crocusfunction(L, rho, K, C, Nx, dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini)
+    #T=voller2function(L, rho, K, C, Nx, dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini,lambd,0.001)
+    T=explicitfunction(L, rho, K, C, Nx, dx, dx2, dt, Nt, Tf, bordhaut, bordbas, Tini)
 
     # T est transposé dans ce qui suit !!!!!!!!!!!!
     print("--- %s seconds ---" % (time.time() - start_time))
